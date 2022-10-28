@@ -9,6 +9,15 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * A <b>read-only</b> Collection, synced with a backing one.
+ * Mainly intended as a fast, in-memory 'cache' layer to a remote, persistent and centralized collection.
+ * <p>
+ *      <b>Important: </b> any attempt to mutate or modify the Collection will throw an {@link UnsupportedOperationException}.
+ *      {@link #startSync()} must be called once, post instantiation, in order to start the sync process.
+ * </p>
+ * @param <E> the type of the Collection elements
+ */
 class InMemSyncedCollection<E> implements SyncedCollection<E> {
 
     private final SyncCollectionSupplier<E> syncCollectionSupplier;
