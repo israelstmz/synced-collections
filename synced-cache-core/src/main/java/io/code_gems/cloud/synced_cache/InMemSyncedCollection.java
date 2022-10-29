@@ -1,12 +1,18 @@
 package io.code_gems.cloud.synced_cache;
 
+import lombok.extern.java.Log;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Spliterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -18,17 +24,32 @@ import java.util.stream.Stream;
  * </p>
  * @param <E> the type of the Collection elements
  */
+@Log
 class InMemSyncedCollection<E> implements SyncedCollection<E> {
 
+    public static final int INITIAL_DELAY = 0;
+    public static final int INTERVAL_MILLIS = 1;
+    public static final Supplier<ScheduledExecutorService> DEFAULT_SCHEDULER_SUPPLIER =
+            () -> Executors.newScheduledThreadPool(1);
+
     private final SyncCollectionSupplier<E> syncCollectionSupplier;
+    private final ScheduledExecutorService scheduler;
     private Collection<E> collection;
 
-    public InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier) {
+    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier) {
         this.syncCollectionSupplier = syncCollectionSupplier;
+        this.scheduler = DEFAULT_SCHEDULER_SUPPLIER.get();
+        updateCollection(Collections.emptyList());
+    }
+
+    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Collection<E> initialCollection) {
+        this.syncCollectionSupplier = syncCollectionSupplier;
+        this.scheduler = DEFAULT_SCHEDULER_SUPPLIER.get();
+        updateCollection(initialCollection);
     }
 
     public void startSync() {
-        collection = Collections.unmodifiableCollection(syncCollectionSupplier.get());
+        scheduler.scheduleWithFixedDelay(this::syncWithSupplier, INITIAL_DELAY, INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
     }
 
     public int size() {
@@ -128,4 +149,15 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
         return collection.toString();
     }
 
+    private void syncWithSupplier() {
+        try {
+            updateCollection(syncCollectionSupplier.get());
+        } catch (Exception e) {
+            log.warning("sync failed: " + e.getMessage());
+        }
+    }
+
+    private void updateCollection(Collection<E> initialCollection) {
+        collection = Collections.unmodifiableCollection(initialCollection);
+    }
 }

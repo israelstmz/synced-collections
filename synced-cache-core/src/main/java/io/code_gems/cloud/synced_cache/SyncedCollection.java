@@ -19,4 +19,9 @@ public interface SyncedCollection<E> extends Collection<E> {
         return new InMemSyncedCollection<>(syncCollectionSupplier);
     }
 
+    static <E> SyncedCollection<E> create(SyncCollectionSupplier<E> syncCollectionSupplier,
+                                          Collection<E> initialCollection) {
+        return new InMemSyncedCollection<>(syncCollectionSupplier, initialCollection);
+    }
+
 }
