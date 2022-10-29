@@ -103,7 +103,7 @@ class SyncedCollectionCommonApiTest {
 
     private SyncedCollection<String> createTestedCollectionOf(Collection<String> c) {
         var syncSupplier = new MockSyncCollectionSupplier<String>();
-        var testedCollection = SyncedCollection.create(syncSupplier);
+        var testedCollection = SyncedCollection.create(syncSupplier, c);
         syncSupplier.mockSupplyWith(c);
         testedCollection.startSync();
         return testedCollection;
