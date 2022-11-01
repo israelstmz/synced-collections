@@ -31,7 +31,7 @@ class SyncCollectionSyncBehaviorTest {
     @DisplayName("a new item added through sync - should appear in collection")
     void itemAddedInSubsequentSync() {
         mockSupplier.mockSupplyWith(Collections.emptyList());
-        await().atMost(Duration.ofSeconds(2)).ignoreExceptions().untilAsserted(() -> assertThat(testedCollection).doesNotContain(ITEM_1));
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).doesNotContain(ITEM_1));
 
         mockSupplier.mockSupplyWith(Collections.singleton(ITEM_1));
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).contains(ITEM_1));
@@ -41,7 +41,7 @@ class SyncCollectionSyncBehaviorTest {
     @DisplayName("an item removed through sync - should not appear in collection")
     void itemRemovedInSubsequentSync() {
         mockSupplier.mockSupplyWith(Collections.singleton(ITEM_1));
-        await().atMost(Duration.ofSeconds(2)).ignoreExceptions().untilAsserted(() -> assertThat(testedCollection).contains(ITEM_1));
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).contains(ITEM_1));
 
         mockSupplier.mockSupplyWith(Collections.emptyList());
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).doesNotContain(ITEM_1));
@@ -51,7 +51,7 @@ class SyncCollectionSyncBehaviorTest {
     @DisplayName("in case supplier failed - scheduler should keep executing next syncs")
     void supplierFailureShouldNotStopSync() {
         mockSupplier.mockSupplyFailure();
-        await().atMost(Duration.ofSeconds(2)).ignoreExceptions().untilAsserted(() -> assertThat(testedCollection).isEmpty());
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).isEmpty());
 
         mockSupplier.mockSupplyWith(Collections.singleton(ITEM_1));
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).contains(ITEM_1));
