@@ -1,5 +1,6 @@
 package io.code_gems.cloud.synced_cache;
 
+import java.time.Duration;
 import java.util.Collection;
 
 /**
@@ -16,12 +17,43 @@ public interface SyncedCollection<E> extends Collection<E> {
     void startSync();
 
     static <E> SyncedCollection<E> create(SyncCollectionSupplier<E> syncCollectionSupplier) {
-        return new InMemSyncedCollection<>(syncCollectionSupplier);
+        return InMemSyncedCollection.<E>builder()
+                .syncCollectionSupplier(syncCollectionSupplier)
+                .build();
     }
 
-    static <E> SyncedCollection<E> create(SyncCollectionSupplier<E> syncCollectionSupplier,
-                                          Collection<E> initialCollection) {
-        return new InMemSyncedCollection<>(syncCollectionSupplier, initialCollection);
+    static <E> SyncedCollectionBuilder<E> build(SyncCollectionSupplier<E> syncCollectionSupplier) {
+        return new SyncedCollectionBuilder<>(syncCollectionSupplier);
+    }
+
+    class SyncedCollectionBuilder<E> {
+
+        private final SyncCollectionSupplier<E> syncCollectionSupplier;
+        private Collection<E> initialCollection;
+        private Duration interval;
+
+        public SyncedCollectionBuilder(SyncCollectionSupplier<E> syncCollectionSupplier) {
+            this.syncCollectionSupplier = syncCollectionSupplier;
+        }
+
+        public SyncedCollectionBuilder<E> initialCollection(Collection<E> initialCollection) {
+            this.initialCollection = initialCollection;
+            return this;
+        }
+
+        public SyncedCollectionBuilder<E> interval(Duration interval) {
+            this.interval = interval;
+            return this;
+        }
+
+        public SyncedCollection<E> build() {
+            return InMemSyncedCollection.<E>builder()
+                    .syncCollectionSupplier(syncCollectionSupplier)
+                    .interval(interval)
+                    .initialCollection(initialCollection)
+                    .build();
+        }
+
     }
 
 }

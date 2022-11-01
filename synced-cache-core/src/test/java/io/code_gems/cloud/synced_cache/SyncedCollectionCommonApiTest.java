@@ -3,6 +3,7 @@ package io.code_gems.cloud.synced_cache;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -10,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"ConstantConditions", "RedundantCollectionOperation"})
-@DisplayName("synced collection common API behaviour should be identical to 'Collection.unmodifiableCollection()':")
+@DisplayName("Synced-Collection API should behave like 'Collection.unmodifiableCollection()':")
 class SyncedCollectionCommonApiTest {
 
     public static final String ITEM_1 = "item1";
@@ -97,14 +98,17 @@ class SyncedCollectionCommonApiTest {
 
     }
 
-    private static Collection<String> createUnmodifiableCollectionOf(Collection<String> c) {
-        return Collections.unmodifiableCollection(c);
+    private static Collection<String> createUnmodifiableCollectionOf(Collection<String> collection) {
+        return Collections.unmodifiableCollection(collection);
     }
 
-    private SyncedCollection<String> createTestedCollectionOf(Collection<String> c) {
+    private SyncedCollection<String> createTestedCollectionOf(Collection<String> collection) {
         var syncSupplier = new MockSyncCollectionSupplier<String>();
-        var testedCollection = SyncedCollection.create(syncSupplier, c);
-        syncSupplier.mockSupplyWith(c);
+        var testedCollection = SyncedCollection.build(syncSupplier)
+                                                       .initialCollection(collection)
+                                                       .interval(Duration.ofMillis(1))
+                                                       .build();
+        syncSupplier.mockSupplyWith(collection);
         testedCollection.startSync();
         return testedCollection;
     }
