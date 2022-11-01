@@ -64,12 +64,30 @@ class SyncCollectionSyncBehaviorTest {
     @DisplayName("in case no sync ever succeeded:")
     class NoSyncEverSucceeded {
 
+        @BeforeEach
+        void setUp() {
+            mockSupplier = new MockSyncCollectionSupplier<>();
+            mockSupplier.mockSupplyFailure();
+            testedCollection = SyncedCollection.build(mockSupplier)
+                                               .interval(Duration.ofMillis(1))
+                                               .build();
+            testedCollection.startSync();
+        }
+
         @Test
         @DisplayName("'contains' action should fail with OutOfSyncException")
         void contains() {
-            mockSupplier.mockSupplyFailure();
             await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
                     assertThatThrownBy(() -> testedCollection.contains(ITEM_1))
+                            .isInstanceOf(OutOfSyncException.class));
+        }
+
+        @Test
+        @DisplayName("'containsAll' action should fail with OutOfSyncException")
+        void containsAll() {
+            var otherCollection = Collections.singleton(ITEM_1);
+            await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
+                    assertThatThrownBy(() -> testedCollection.containsAll(otherCollection))
                             .isInstanceOf(OutOfSyncException.class));
         }
 

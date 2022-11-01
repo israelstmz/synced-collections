@@ -17,9 +17,19 @@ public class StrictSyncedCollection<E> extends InMemSyncedCollection<E> {
 
     @Override
     public boolean contains(Object o) {
+        verifyCollectionIsSynced();
+        return super.contains(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        verifyCollectionIsSynced();
+        return super.containsAll(c);
+    }
+
+    private void verifyCollectionIsSynced() {
         if (!isSynced()) {
             throw new OutOfSyncException();
         }
-        return super.contains(o);
     }
 }
