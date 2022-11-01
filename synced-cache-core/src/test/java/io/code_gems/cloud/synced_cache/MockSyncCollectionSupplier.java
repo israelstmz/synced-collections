@@ -2,21 +2,28 @@ package io.code_gems.cloud.synced_cache;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 class MockSyncCollectionSupplier<E> implements SyncCollectionSupplier<E> {
 
-    private Collection<E> collection;
+    private Supplier<Collection<E>> collectionSupplier;
 
     public MockSyncCollectionSupplier() {
-        collection = Collections.emptyList();
+        collectionSupplier = Collections::emptyList;
     }
 
     public void mockSupplyWith(Collection<E> collection) {
-        this.collection = collection;
+        collectionSupplier = () -> collection;
+    }
+
+    public void mockSupplyFailure() {
+        collectionSupplier = () -> {
+            throw new RuntimeException();
+        };
     }
 
     @Override
     public Collection<E> get() {
-        return collection;
+        return collectionSupplier.get();
     }
 }

@@ -46,4 +46,14 @@ class SyncCollectionSyncBehaviorTest {
         mockSupplier.mockSupplyWith(Collections.emptyList());
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).doesNotContain(ITEM_1));
     }
+
+    @Test
+    @DisplayName("in case supplier failed - scheduler should keep executing next syncs")
+    void supplierFailureShouldNotStopSync() {
+        mockSupplier.mockSupplyFailure();
+        await().atMost(Duration.ofSeconds(2)).ignoreExceptions().untilAsserted(() -> assertThat(testedCollection).isEmpty());
+
+        mockSupplier.mockSupplyWith(Collections.singleton(ITEM_1));
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> assertThat(testedCollection).contains(ITEM_1));
+    }
 }
