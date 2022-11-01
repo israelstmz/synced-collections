@@ -15,9 +15,10 @@ import java.util.Collection;
 public interface SyncedCollection<E> extends Collection<E> {
 
     void startSync();
+    boolean isSynced();
 
     static <E> SyncedCollection<E> create(SyncCollectionSupplier<E> syncCollectionSupplier) {
-        return InMemSyncedCollection.<E>builder()
+        return StrictSyncedCollection.<E>builder()
                 .syncCollectionSupplier(syncCollectionSupplier)
                 .build();
     }
@@ -47,7 +48,7 @@ public interface SyncedCollection<E> extends Collection<E> {
         }
 
         public SyncedCollection<E> build() {
-            return InMemSyncedCollection.<E>builder()
+            return StrictSyncedCollection.<E>builder()
                     .syncCollectionSupplier(syncCollectionSupplier)
                     .interval(interval)
                     .initialCollection(initialCollection)

@@ -1,7 +1,5 @@
 package io.code_gems.cloud.synced_cache;
 
-import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.extern.java.Log;
 
 import java.time.Duration;
@@ -36,8 +34,8 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
     private final ScheduledExecutorService scheduler;
     private final Duration interval;
     private Collection<E> collection;
+    private boolean isSynced;
 
-    @Builder(access = AccessLevel.PACKAGE)
     InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval,
                           Collection<E> initialCollection, ScheduledExecutorService scheduler) {
         if (syncCollectionSupplier == null) {
@@ -46,11 +44,18 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
         this.syncCollectionSupplier = syncCollectionSupplier;
         this.scheduler = Optional.ofNullable(scheduler).orElseGet(DEFAULT_SCHEDULER_SUPPLIER);
         this.interval = Optional.ofNullable(interval).orElse(DEFAULT_INTERVAL);
+        if (initialCollection != null) {
+            isSynced = true;
+        }
         updateCollection(Optional.ofNullable(initialCollection).orElse(Collections.emptyList()));
     }
 
     public void startSync() {
         scheduler.scheduleWithFixedDelay(this::syncWithSupplier, NO_DELAY, interval.toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    public boolean isSynced() {
+        return isSynced;
     }
 
     public int size() {
@@ -153,6 +158,7 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
     private void syncWithSupplier() {
         try {
             updateCollection(syncCollectionSupplier.get());
+            isSynced = true;
         } catch (Exception e) {
             log.warning("sync failed: " + e);
         }
