@@ -21,7 +21,9 @@ class SyncCollectionSyncBehaviorTest {
     @BeforeEach
     void setUp() {
         mockSupplier = new MockSyncCollectionSupplier<>();
-        testedCollection = SyncedCollection.create(mockSupplier);
+        testedCollection = SyncedCollection.build(mockSupplier)
+                .interval(Duration.ofMillis(1))
+                .build();
         testedCollection.startSync();
     }
 

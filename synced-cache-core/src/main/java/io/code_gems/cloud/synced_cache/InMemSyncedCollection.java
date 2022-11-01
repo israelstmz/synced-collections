@@ -1,11 +1,11 @@
 package io.code_gems.cloud.synced_cache;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.extern.java.Log;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Spliterator;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,29 +27,29 @@ import java.util.stream.Stream;
 @Log
 class InMemSyncedCollection<E> implements SyncedCollection<E> {
 
-    public static final int INITIAL_DELAY = 0;
-    public static final int INTERVAL_MILLIS = 1;
+    public static final int NO_DELAY = 0;
+    public static final Duration DEFAULT_INTERVAL = Duration.ofMinutes(1);
     public static final Supplier<ScheduledExecutorService> DEFAULT_SCHEDULER_SUPPLIER =
             () -> Executors.newScheduledThreadPool(1);
 
     private final SyncCollectionSupplier<E> syncCollectionSupplier;
     private final ScheduledExecutorService scheduler;
+    private final Duration interval;
     private Collection<E> collection;
 
-    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier) {
+    @Builder(access = AccessLevel.PACKAGE)
+    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval, Collection<E> initialCollection) {
+        if (syncCollectionSupplier == null) {
+            throw new IllegalStateException("Instance of SyncCollectionSupplier must be provided");
+        }
         this.syncCollectionSupplier = syncCollectionSupplier;
         this.scheduler = DEFAULT_SCHEDULER_SUPPLIER.get();
-        updateCollection(Collections.emptyList());
-    }
-
-    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Collection<E> initialCollection) {
-        this.syncCollectionSupplier = syncCollectionSupplier;
-        this.scheduler = DEFAULT_SCHEDULER_SUPPLIER.get();
-        updateCollection(initialCollection);
+        this.interval = Optional.ofNullable(interval).orElse(DEFAULT_INTERVAL);
+        updateCollection(Optional.ofNullable(initialCollection).orElse(Collections.emptyList()));
     }
 
     public void startSync() {
-        scheduler.scheduleWithFixedDelay(this::syncWithSupplier, INITIAL_DELAY, INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
+        scheduler.scheduleWithFixedDelay(this::syncWithSupplier, NO_DELAY, interval.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     public int size() {
