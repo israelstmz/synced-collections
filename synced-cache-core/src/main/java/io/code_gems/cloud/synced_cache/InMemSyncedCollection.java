@@ -38,12 +38,13 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
     private Collection<E> collection;
 
     @Builder(access = AccessLevel.PACKAGE)
-    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval, Collection<E> initialCollection) {
+    InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval,
+                          Collection<E> initialCollection, ScheduledExecutorService scheduler) {
         if (syncCollectionSupplier == null) {
             throw new IllegalStateException("Instance of SyncCollectionSupplier must be provided");
         }
         this.syncCollectionSupplier = syncCollectionSupplier;
-        this.scheduler = DEFAULT_SCHEDULER_SUPPLIER.get();
+        this.scheduler = Optional.ofNullable(scheduler).orElseGet(DEFAULT_SCHEDULER_SUPPLIER);
         this.interval = Optional.ofNullable(interval).orElse(DEFAULT_INTERVAL);
         updateCollection(Optional.ofNullable(initialCollection).orElse(Collections.emptyList()));
     }
