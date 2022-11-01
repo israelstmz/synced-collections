@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"ConstantConditions", "RedundantCollectionOperation"})
-@DisplayName("synced collection common API behaviour should be identical to 'Collection.unmodifiableCollection()':")
+@DisplayName("Synced-Collection API should behave like 'Collection.unmodifiableCollection()':")
 class SyncedCollectionCommonApiTest {
 
     public static final String ITEM_1 = "item1";
