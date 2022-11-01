@@ -154,7 +154,7 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
         try {
             updateCollection(syncCollectionSupplier.get());
         } catch (Exception e) {
-            log.warning("sync failed: " + e.getMessage());
+            log.warning("sync failed: " + e);
         }
     }
 
