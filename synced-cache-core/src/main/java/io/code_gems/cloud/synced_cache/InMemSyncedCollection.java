@@ -26,19 +26,19 @@ import java.util.stream.Stream;
 @Log
 class InMemSyncedCollection<E> implements SyncedCollection<E> {
 
-    public static final int NO_DELAY = 0;
-    public static final Duration DEFAULT_INTERVAL = Duration.ofMinutes(1);
-    public static final Supplier<ScheduledExecutorService> DEFAULT_SCHEDULER_SUPPLIER =
-            () -> Executors.newScheduledThreadPool(1);
+    private static final int NO_DELAY = 0;
+    private static final Duration DEFAULT_INTERVAL = Duration.ofMinutes(1);
     private static final int DEFAULT_MAX_ALLOWED_NO_SYNC_INTERVALS = 4;
+    private static final Supplier<ScheduledExecutorService> DEFAULT_SCHEDULER_SUPPLIER =
+            () -> Executors.newScheduledThreadPool(1);
 
     private final SyncCollectionSupplier<E> syncCollectionSupplier;
     private final ScheduledExecutorService scheduler;
     private final Duration interval;
-    private Collection<E> collection;
-    private boolean isSynced;
     private final AtomicInteger noSyncIntervals;
     private final int maxAllowedNoSyncIntervals;
+    private boolean isSynced;
+    private Collection<E> collection;
 
     InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval,
                           Collection<E> initialCollection, ScheduledExecutorService scheduler,
@@ -51,10 +51,11 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
         this.scheduler = Optional.ofNullable(scheduler).orElseGet(DEFAULT_SCHEDULER_SUPPLIER);
         this.interval = Optional.ofNullable(interval).orElse(DEFAULT_INTERVAL);
         this.noSyncIntervals = new AtomicInteger(0);
+        this.collection = Collections.unmodifiableCollection(
+                Optional.ofNullable(initialCollection).orElse(Collections.emptyList()));
         if (initialCollection != null) {
             isSynced = true;
         }
-        updateCollection(Optional.ofNullable(initialCollection).orElse(Collections.emptyList()));
     }
 
     public void startSync() {
@@ -164,7 +165,7 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
 
     private void syncWithSupplier() {
         try {
-            updateCollection(syncCollectionSupplier.get());
+            this.collection = Collections.unmodifiableCollection(syncCollectionSupplier.get());
             isSynced = true;
             noSyncIntervals.set(0);
         } catch (Exception e) {
@@ -179,7 +180,4 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
         }
     }
 
-    private void updateCollection(Collection<E> initialCollection) {
-        collection = Collections.unmodifiableCollection(initialCollection);
-    }
 }
