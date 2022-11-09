@@ -58,26 +58,54 @@ class SyncCollectionSyncBehaviorTest {
 
     @SuppressWarnings("unused")
     @ParameterizedTest(name = "''{1}''")
-    @DisplayName("in case no sync ever succeeded, following accessor actions should fail:")
+    @DisplayName("in case no sync ever succeeded - following accessor actions should fail:")
     @MethodSource
-    void accessorActionsShouldFail(ThrowableAssert.ThrowingCallable action, String actionName) {
+    void noSyncEverSucceeded(ThrowableAssert.ThrowingCallable action, String actionName) {
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
                 assertThatThrownBy(action).isInstanceOf(OutOfSyncException.class));
     }
 
-    static Stream<Arguments> accessorActionsShouldFail() {
+    static Stream<Arguments> noSyncEverSucceeded() {
         var mockSupplier = new MockSyncCollectionSupplier<>();
         mockSupplier.mockSupplyFailure();
         var testedCollection = SyncedCollection.build(mockSupplier).interval(Duration.ofMillis(1)).build();
         testedCollection.startSync();
         return Stream.of(
-            arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.contains(ITEM_1), "contains"),
-            arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.containsAll(Collections.singleton(ITEM_1)), "containsAll"),
-            arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.forEach(item -> {}), "forEach"),
-            arguments((ThrowableAssert.ThrowingCallable) testedCollection::size, "size"),
-            arguments((ThrowableAssert.ThrowingCallable) testedCollection::iterator, "iterator"),
-            arguments((ThrowableAssert.ThrowingCallable) testedCollection::stream, "stream"),
-            arguments((ThrowableAssert.ThrowingCallable) testedCollection::spliterator, "spliterator")
+                arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.contains(ITEM_1), "contains"),
+                arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.containsAll(Collections.singleton(ITEM_1)), "containsAll"),
+                arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.forEach(item -> {}), "forEach"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::size, "size"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::iterator, "iterator"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::stream, "stream"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::spliterator, "spliterator")
+        );
+    }
+
+    @SuppressWarnings("unused")
+    @ParameterizedTest(name = "''{1}''")
+    @DisplayName("in case no sync succeeded during allowed period - following accessor actions should fail:")
+    @MethodSource
+    void outOfSync(ThrowableAssert.ThrowingCallable action, String actionName) {
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
+                assertThatThrownBy(action).isInstanceOf(OutOfSyncException.class));
+    }
+
+    static Stream<Arguments> outOfSync() {
+        var mockSupplier = new MockSyncCollectionSupplier<>();
+        mockSupplier.mockSupplyFailure();
+        var testedCollection = SyncedCollection.build(mockSupplier)
+                                               .interval(Duration.ofMillis(1))
+                                               .initialCollection(Collections.emptyList())
+                                               .build();
+        testedCollection.startSync();
+        return Stream.of(
+                arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.contains(ITEM_1), "contains"),
+                arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.containsAll(Collections.singleton(ITEM_1)), "containsAll"),
+                arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.forEach(item -> {}), "forEach"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::size, "size"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::iterator, "iterator"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::stream, "stream"),
+                arguments((ThrowableAssert.ThrowingCallable) testedCollection::spliterator, "spliterator")
         );
     }
 

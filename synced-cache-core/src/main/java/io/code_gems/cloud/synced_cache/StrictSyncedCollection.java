@@ -15,8 +15,9 @@ public class StrictSyncedCollection<E> extends InMemSyncedCollection<E> {
 
     @Builder(access = AccessLevel.PACKAGE)
     StrictSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval,
-                           Collection<E> initialCollection, ScheduledExecutorService scheduler) {
-        super(syncCollectionSupplier, interval, initialCollection, scheduler);
+                           Collection<E> initialCollection, ScheduledExecutorService scheduler,
+                           Integer maxAllowedNoSyncIntervals) {
+        super(syncCollectionSupplier, interval, initialCollection, scheduler, maxAllowedNoSyncIntervals);
     }
 
     @Override

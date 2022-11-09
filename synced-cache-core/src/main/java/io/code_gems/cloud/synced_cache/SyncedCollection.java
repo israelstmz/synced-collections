@@ -32,6 +32,7 @@ public interface SyncedCollection<E> extends Collection<E> {
         private final SyncCollectionSupplier<E> syncCollectionSupplier;
         private Collection<E> initialCollection;
         private Duration interval;
+        private Integer maxAllowedNoSyncIntervals;
 
         public SyncedCollectionBuilder(SyncCollectionSupplier<E> syncCollectionSupplier) {
             this.syncCollectionSupplier = syncCollectionSupplier;
@@ -47,11 +48,17 @@ public interface SyncedCollection<E> extends Collection<E> {
             return this;
         }
 
+        public SyncedCollectionBuilder<E> maxAllowedNoSyncIntervals(Integer intervals) {
+            this.maxAllowedNoSyncIntervals = intervals;
+            return this;
+        }
+
         public SyncedCollection<E> build() {
             return StrictSyncedCollection.<E>builder()
                     .syncCollectionSupplier(syncCollectionSupplier)
                     .interval(interval)
                     .initialCollection(initialCollection)
+                    .maxAllowedNoSyncIntervals(maxAllowedNoSyncIntervals)
                     .build();
         }
 

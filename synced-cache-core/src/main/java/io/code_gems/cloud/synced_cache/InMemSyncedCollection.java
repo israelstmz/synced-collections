@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
@@ -29,21 +30,27 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
     public static final Duration DEFAULT_INTERVAL = Duration.ofMinutes(1);
     public static final Supplier<ScheduledExecutorService> DEFAULT_SCHEDULER_SUPPLIER =
             () -> Executors.newScheduledThreadPool(1);
+    private static final int DEFAULT_MAX_ALLOWED_NO_SYNC_INTERVALS = 4;
 
     private final SyncCollectionSupplier<E> syncCollectionSupplier;
     private final ScheduledExecutorService scheduler;
     private final Duration interval;
     private Collection<E> collection;
     private boolean isSynced;
+    private final AtomicInteger noSyncIntervals;
+    private final int maxAllowedNoSyncIntervals;
 
     InMemSyncedCollection(SyncCollectionSupplier<E> syncCollectionSupplier, Duration interval,
-                          Collection<E> initialCollection, ScheduledExecutorService scheduler) {
+                          Collection<E> initialCollection, ScheduledExecutorService scheduler,
+                          Integer maxAllowedNoSyncIntervals) {
         if (syncCollectionSupplier == null) {
             throw new IllegalStateException("Instance of SyncCollectionSupplier must be provided");
         }
         this.syncCollectionSupplier = syncCollectionSupplier;
+        this.maxAllowedNoSyncIntervals = Optional.ofNullable(maxAllowedNoSyncIntervals).orElse(DEFAULT_MAX_ALLOWED_NO_SYNC_INTERVALS);
         this.scheduler = Optional.ofNullable(scheduler).orElseGet(DEFAULT_SCHEDULER_SUPPLIER);
         this.interval = Optional.ofNullable(interval).orElse(DEFAULT_INTERVAL);
+        this.noSyncIntervals = new AtomicInteger(0);
         if (initialCollection != null) {
             isSynced = true;
         }
@@ -159,8 +166,16 @@ class InMemSyncedCollection<E> implements SyncedCollection<E> {
         try {
             updateCollection(syncCollectionSupplier.get());
             isSynced = true;
+            noSyncIntervals.set(0);
         } catch (Exception e) {
+            checkAllowedNoSyncPeriod();
             log.warning("sync failed: " + e);
+        }
+    }
+
+    private void checkAllowedNoSyncPeriod() {
+        if (noSyncIntervals.incrementAndGet() > maxAllowedNoSyncIntervals) {
+            isSynced = false;
         }
     }
 
