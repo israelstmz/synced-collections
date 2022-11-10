@@ -15,7 +15,7 @@ This cache is read-only and designed for optimized, small-cache "get/contains".
 public class Example {
 
     public static void main(String[] args) {
-        // create instance of SyncedCollection
+        // creating an instance of SyncedCollection
         SyncCollectionSupplier<String> supplier = webClient.fetchCollection();
         Collection<String> syncedCollection = SyncedCollection.createAndSync(supplier);
 
@@ -32,11 +32,13 @@ public class Example {
 public class Example {
 
     public static void main(String[] args) {
+        // building an instance of SyncedCollection
         SyncCollectionSupplier<String> supplier = webClient.fetchCollection();
         Collection<String> syncedCollection = SyncedCollection.build(supplier)
                                                               .interval(Duration.ofMinutes(1))
                                                               .buildAndSync();
 
+        // using it
         assert syncedCollection.contains("item");
     }
 
