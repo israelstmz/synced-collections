@@ -6,7 +6,7 @@
 
     <groupId>io.code-gems.cloud</groupId>
     <artifactId>synced-cache</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
 
