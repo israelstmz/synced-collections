@@ -17,10 +17,12 @@ public interface SyncedCollection<E> extends Collection<E> {
     void startSync();
     boolean isSynced();
 
-    static <E> SyncedCollection<E> create(SyncCollectionSupplier<E> syncCollectionSupplier) {
-        return StrictSyncedCollection.<E>builder()
+    static <E> SyncedCollection<E> createAndSync(SyncCollectionSupplier<E> syncCollectionSupplier) {
+        var collection = StrictSyncedCollection.<E>builder()
                 .syncCollectionSupplier(syncCollectionSupplier)
                 .build();
+        collection.startSync();
+        return collection;
     }
 
     static <E> SyncedCollectionBuilder<E> build(SyncCollectionSupplier<E> syncCollectionSupplier) {
@@ -53,13 +55,15 @@ public interface SyncedCollection<E> extends Collection<E> {
             return this;
         }
 
-        public SyncedCollection<E> build() {
-            return StrictSyncedCollection.<E>builder()
+        public SyncedCollection<E> buildAndSync() {
+            var collection = StrictSyncedCollection.<E>builder()
                     .syncCollectionSupplier(syncCollectionSupplier)
                     .interval(interval)
                     .initialCollection(initialCollection)
                     .maxAllowedNoSyncIntervals(maxAllowedNoSyncIntervals)
                     .build();
+            collection.startSync();
+            return collection;
         }
 
     }

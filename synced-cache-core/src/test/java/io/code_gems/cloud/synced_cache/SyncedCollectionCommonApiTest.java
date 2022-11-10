@@ -104,13 +104,11 @@ class SyncedCollectionCommonApiTest {
 
     private SyncedCollection<String> createTestedCollectionOf(Collection<String> collection) {
         var syncSupplier = new MockSyncCollectionSupplier<String>();
-        var testedCollection = SyncedCollection.build(syncSupplier)
-                                                       .initialCollection(collection)
-                                                       .interval(Duration.ofMillis(1))
-                                                       .build();
         syncSupplier.mockSupplyWith(collection);
-        testedCollection.startSync();
-        return testedCollection;
+        return SyncedCollection.build(syncSupplier)
+                               .initialCollection(collection)
+                               .interval(Duration.ofMillis(1))
+                               .buildAndSync();
     }
 
     private void assertEqualFailure(Runnable testedAction, Runnable expectedAction, String actionName) {

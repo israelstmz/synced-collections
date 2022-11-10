@@ -32,8 +32,7 @@ class SyncCollectionSyncBehaviorTest {
         mockSupplier = new MockSyncCollectionSupplier<>();
         testedCollection = SyncedCollection.build(mockSupplier)
                 .interval(INTERVAL)
-                .build();
-        testedCollection.startSync();
+                .buildAndSync();
     }
 
     @Test
@@ -68,8 +67,7 @@ class SyncCollectionSyncBehaviorTest {
     static Stream<Arguments> noSyncEverSucceeded() {
         var mockSupplier = new MockSyncCollectionSupplier<>();
         mockSupplier.mockSupplyFailure();
-        var testedCollection = SyncedCollection.build(mockSupplier).interval(Duration.ofMillis(1)).build();
-        testedCollection.startSync();
+        var testedCollection = SyncedCollection.build(mockSupplier).interval(Duration.ofMillis(1)).buildAndSync();
         return Stream.of(
                 arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.contains(ITEM_1), "contains"),
                 arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.containsAll(Collections.singleton(ITEM_1)), "containsAll"),
@@ -96,8 +94,7 @@ class SyncCollectionSyncBehaviorTest {
         var testedCollection = SyncedCollection.build(mockSupplier)
                                                .interval(Duration.ofMillis(1))
                                                .initialCollection(Collections.emptyList())
-                                               .build();
-        testedCollection.startSync();
+                                               .buildAndSync();
         return Stream.of(
                 arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.contains(ITEM_1), "contains"),
                 arguments((ThrowableAssert.ThrowingCallable) () -> testedCollection.containsAll(Collections.singleton(ITEM_1)), "containsAll"),
