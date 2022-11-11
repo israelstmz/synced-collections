@@ -23,7 +23,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Publish to GitHub Packages Apache Maven
+      - name: Publish
         run: mvn deploy
         env:
           GITHUB_TOKEN: ${{ github.token }}
