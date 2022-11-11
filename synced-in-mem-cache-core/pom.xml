@@ -11,4 +11,12 @@
 
     <artifactId>synced-in-mem-cache-core</artifactId>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/israelstmz/synced-in-mem-cache</url>
+        </repository>
+    </distributionManagement>
+
 </project>
