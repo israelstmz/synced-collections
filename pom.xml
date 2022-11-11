@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.code-gems.cloud</groupId>
-    <artifactId>synced-in-mem-cache</artifactId>
+    <artifactId>synced-collections</artifactId>
     <version>1.0.0</version>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>synced-in-mem-cache-core</module>
+        <module>synced-collections-core</module>
     </modules>
 
     <properties>
@@ -78,7 +78,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/israelstmz/synced-in-mem-cache</url>
+            <url>https://maven.pkg.github.com/israelstmz/synced-collections</url>
         </repository>
     </distributionManagement>
 
